@@ -5,7 +5,10 @@ default: &default
   pass: some_pass
   vhost: /
   heartbeat: 30
+
 development:
   <<: *default
+
 production:
   <<: *default
+

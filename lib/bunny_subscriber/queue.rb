@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BunnySubscriber
   class Queue
     attr_reader :channel, :queue_consummer
@@ -43,27 +45,20 @@ module BunnySubscriber
         consumer.subscriber_options[:queue_name], options
       )
 
-      queue_exchanges = create_exchanges(consumer, consumer.subscriber_options[:exchanges])
-      queue.bind(queue_exchanges.last) if queue_exchanges.present?
+      master_exchange = if (m_exchange = consumer.subscriber_options[:master_exchange])
+                          channel.fanout(m_exchange, options)
+                        end
+
+      queue_exchange = if (q_exchange = consumer.subscriber_options[:queue_exchange])
+                         channel.fanout(q_exchange, options)
+                       end
+
+      if queue_exchange
+        queue_exchange.bind(master_exchange) if master_exchange
+        queue.bind(queue_exchange)
+      end
 
       queue
-    end
-
-    def create_exchanges(_consumer, exchanges)
-      return unless exchanges.present?
-
-      previous_exchange = nil
-      exchanges.map do |exchange|
-        exchange_name = exchange.fetch(:name)
-        exchange_type = exchange.fetch(:type, 'fanout')
-        exchange_opts = exchange.fetch(:options, { durable: true })
-
-        new_exchange = channel.send(exchange_type, exchange_name, exchange_opts)
-        new_exchange.bind(previous_exchange) if previous_exchange
-        previous_exchange = new_exchange
-
-        new_exchange
-      end
     end
   end
 end

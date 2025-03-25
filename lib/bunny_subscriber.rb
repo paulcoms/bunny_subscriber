@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bunny_subscriber/version'
 require 'bunny_subscriber/configuration'
 require 'bunny_subscriber/worker'

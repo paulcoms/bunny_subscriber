@@ -51,7 +51,7 @@ class ConsumerTestWithCorrectProccess < Minitest::Test
 
     assert_equal(
       msg,
-      @channel.acknowledged_state[:acked][delivery_tag].last,
+      @channel.acknowledged_state[:acked][delivery_tag].last
     )
   end
 end
@@ -96,7 +96,7 @@ class ConsumerTestWithErrorProccessDeadLetterExchange < Minitest::Test
     include BunnySubscriber::Consumer
 
     subscriber_options queue_name: 'some.other.queue',
-                      dead_letter_exchange: 'some-exchange'
+                       dead_letter_exchange: 'some-exchange'
 
     def process_event(_msg)
       raise StandardError, ''

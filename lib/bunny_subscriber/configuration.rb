@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'singleton'
 require 'ostruct'
 
@@ -13,8 +15,7 @@ module BunnySubscriber
   class Configuration
     include Singleton
 
-    attr_accessor :bunny_options, :server_options, :consumer_options
-    attr_accessor :environment
+    attr_accessor :bunny_options, :server_options, :consumer_options, :environment
 
     def initialize
       @environment = ENV['RAILS_ENV'] || 'development'
