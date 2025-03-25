@@ -13,7 +13,7 @@ module BunnySubscriber
       attr_reader :subscriber_options_hash
 
       def subscriber_options(opts = {})
-        valid_keys = %i[queue_name dead_letter_exchange]
+        valid_keys = %i[queue_name exchanges dead_letter_exchange]
         valid_opts = opts.select { |key, _v| valid_keys.include? key }
         @subscriber_options_hash = valid_opts
       end

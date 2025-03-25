@@ -30,7 +30,8 @@ module BunnySubscriber
 
     def create_queue(consumer)
       if consumer.subscriber_options[:queue_name].nil?
-        raise ArgumentError, '`queue_name` option is required'
+        raise ArgumentError,
+              '`queue_name` option is required'
       end
 
       options = { durable: true }
@@ -38,9 +39,31 @@ module BunnySubscriber
         options[:arguments] = { 'x-dead-letter-exchange': dl_exchange }
       end
 
-      channel.queue(
+      queue = channel.queue(
         consumer.subscriber_options[:queue_name], options
       )
+
+      queue_exchanges = create_exchanges(consumer, consumer.subscriber_options[:exchanges])
+      queue.bind(queue_exchanges.last) if queue_exchanges.present?
+
+      queue
+    end
+
+    def create_exchanges(_consumer, exchanges)
+      return unless exchanges.present?
+
+      previous_exchange = nil
+      exchanges.map do |exchange|
+        exchange_name = exchange.fetch(:name)
+        exchange_type = exchange.fetch(:type, 'fanout')
+        exchange_opts = exchange.fetch(:options, { durable: true })
+
+        new_exchange = channel.send(exchange_type, exchange_name, exchange_opts)
+        new_exchange.bind(previous_exchange) if previous_exchange
+        previous_exchange = new_exchange
+
+        new_exchange
+      end
     end
   end
 end
